@@ -4,6 +4,7 @@ package com.marcos.projetoWeb.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.marcos.projetoWeb.services.CategoryService;
 import jakarta.persistence.*;
+import org.aspectj.weaver.ast.Or;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,6 +30,9 @@ public class Product implements Serializable {
     @ManyToMany
     @JoinTable(name = "tb_product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private final Set<Category> categories = new HashSet<>();
+
+    @OneToMany(mappedBy=  "id.product")
+    private final Set<OrderItem> orders = new HashSet<>();
 
     public Product(){}
     public Product(Long id, String name, String description, Double price, String imgUrl) {
@@ -81,6 +85,16 @@ public class Product implements Serializable {
 
     public Set<Category> getCategories() {
         return categories;
+    }
+    @JsonIgnore
+    public Set<Order> getOrders() {
+        Set<Order> set = new HashSet<>();
+
+        for (OrderItem item : orders){
+            set.add(item.getOrder());
+        }
+
+        return set;
     }
 
     @Override

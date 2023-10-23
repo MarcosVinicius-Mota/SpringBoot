@@ -1,16 +1,18 @@
 package com.marcos.projetoWeb.entities;
 
 
-import ch.qos.logback.core.net.server.Client;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.marcos.projetoWeb.entities.enums.OrderStatus;
 import jakarta.persistence.*;
-import org.aspectj.weaver.ast.Or;
+
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_order")
@@ -29,6 +31,14 @@ public class Order implements Serializable {
     @ManyToOne
     @JoinColumn(name = "client_id")
     private User client;
+
+    @OneToMany(mappedBy = "id.order")
+
+    private Set<OrderItem> items = new HashSet<>();
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
+
     public Order(){}
 
     public Order(Long id, Instant moment, OrderStatus orderStatus, User client) {
@@ -71,6 +81,18 @@ public class Order implements Serializable {
         this.client = client;
     }
 
+    public Set<OrderItem> getItems() {
+        return items;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,4 +114,14 @@ public class Order implements Serializable {
                 ", client=" + client +
                 '}';
     }
+
+    public Double getTotal(){
+        double sum = 0.0;
+        for(OrderItem item : items){
+            sum += item.getSubTotal();
+        }
+        return sum;
+    }
+
+
 }
